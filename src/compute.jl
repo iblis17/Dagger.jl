@@ -53,7 +53,17 @@ end
 Compute a Thunk - creates the DAG, assigns ranks to
 nodes for tie breaking and runs the scheduler.
 """
+
+const _compute = Ref{Any}(nothing)
 function compute(ctx, d::Thunk)
+    if _compute[] === nothing
+        dagger_compute(ctx, d)
+    else
+        ret = (_compute[])(ctx, d)
+    end
+end
+
+function dagger_compute(ctx, d::Thunk)
     master = OSProc(myid())
     @dbg timespan_start(ctx, :scheduler_init, 0, master)
 
